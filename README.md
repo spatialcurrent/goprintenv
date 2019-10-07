@@ -39,23 +39,19 @@ Find releases at [https://github.com/spatialcurrent/goprintenv/releases](https:/
 See the usage below or the following examples.
 
 ```shell
-gocat is a super simple utility to concatenate files (local, remote, or on AWS S3) provided as positional arguments.
-Supports stdin (aka "-"), local files (path/to/file or file://path/to/file), remote files (http://path/to/file), or files on AWS S3 (s3://path/to/file).
-Supports the following compression algorithms: bzip2, flate, gzip, none, snappy, zip, zlib
+goprintenv is a super simple utility to print environment variables in a custom format.
+Supports the following formats: csv, bson, go, gob, json, properties, tags, toml, tsv, yaml.
 
 Usage:
-  gocat [flags] [-|stdin|FILE|URI]...
+  goprintenv [-f FORMAT] [flags] [variable]...
 
 Flags:
-  -a, --append-new-lines               append new lines to files
-      --aws-access-key-id string       AWS Access Key ID
-      --aws-default-region string      AWS Default Region
-      --aws-profile string             AWS Profile
-      --aws-region string              AWS Region (overrides default region)
-      --aws-secret-access-key string   AWS Secret Access Key
-      --aws-session-token string       AWS Session Token
-  -b, --buffer-size int                buffer size for file reader (default 4096)
-  -h, --help                           help for gocat
+  -f, --format string   output format, one of: csv, bson, go, gob, json, properties, tags, toml, tsv, yaml (default "properties")
+  -h, --help            help for goprintenv
+  -0, --null            use a NUL byte to end each line instead of a newline character
+  -p, --pretty          use pretty output format
+  -r, --reversed        if output is sorted, sort in reverse alphabetical order
+  -s, --sorted          sort output
 ```
 
 # Examples

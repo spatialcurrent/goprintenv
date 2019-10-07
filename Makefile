@@ -57,7 +57,7 @@ fmt:  ## Format Go source code
 .PHONY: imports
 imports: ## Update imports in Go source code
 	# If missing, install goimports with: go get golang.org/x/tools/cmd/goimports
-	goimports -w -local github.com/spatialcurrent/gocat,github.com/spatialcurrent $$(find . -iname '*.go')
+	goimports -w -local github.com/spatialcurrent/goprintenv,github.com/spatialcurrent $$(find . -iname '*.go')
 
 vet: ## Vet Go source code
 	go vet $$(go list ./...)
