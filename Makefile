@@ -47,22 +47,28 @@ deps_arm:  ## Install dependencies to cross-compile to ARM
 # Go building, formatting, testing, and installing
 #
 
-.PHONY: fmt
+#
+# Go building, formatting, testing, and installing
+#
+
 fmt:  ## Format Go source code
 	go fmt $$(go list ./... )
 
 .PHONY: imports
 imports: ## Update imports in Go source code
 	# If missing, install goimports with: go get golang.org/x/tools/cmd/goimports
-	goimports -w $$(find . -iname '*.go')
+	goimports -w -local github.com/spatialcurrent/goprintenv,github.com/spatialcurrent $$(find . -iname '*.go')
 
-.PHONY: vet
 vet: ## Vet Go source code
 	go vet $$(go list ./...)
 
 .PHONY: test_go
 test_go: ## Run Go tests
 	bash scripts/test.sh
+
+.PHONY: test_cli
+test_cli: ## Run CLI tests
+	bash scripts/test-cli.sh
 
 .PHONY: build
 build: build_cli  ## Build all artifacts
