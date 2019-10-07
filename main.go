@@ -11,16 +11,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
-)
 
-import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-)
 
-import (
 	"github.com/spatialcurrent/go-simple-serializer/pkg/gss"
 	"github.com/spatialcurrent/go-simple-serializer/pkg/serializer"
 )
@@ -38,6 +34,7 @@ var (
 		serializer.FormatCSV,        // comma-separated values
 		serializer.FormatBSON,       // binary json
 		serializer.FormatGo,         // Go-syntax representation of the value
+		serializer.FormatGob,        // gob-encoded
 		serializer.FormatJSON,       // JSON
 		serializer.FormatProperties, // java properties
 		serializer.FormatTags,       // list of space-separated key=value pairs
@@ -90,7 +87,8 @@ func main() {
 		Use:                   "goprintenv [-f FORMAT] [flags] [variable]...",
 		DisableFlagsInUseLine: true,
 		Short:                 "goprintenv",
-		Long:                  `goprintenv is a super simple utility to print environment variables in a custom format.  Supports: ` + strings.Join(validFormats, ", ") + `.`,
+		Long: `goprintenv is a super simple utility to print environment variables in a custom format.
+Supports the following formats: ` + strings.Join(validFormats, ", ") + `.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			v, err := initViper(cmd)
 			if err != nil {
@@ -120,18 +118,32 @@ func main() {
 				lineSeparator = string([]byte{byte(0)})
 			}
 
-			outputBytes, err := gss.SerializeBytes(&gss.SerializeBytesInput{
+			sorted := v.GetBool(flagSorted)
+
+			serializeBytesInput := &gss.SerializeBytesInput{
 				Object:            obj,
 				Format:            format,
 				Header:            gss.NoHeader,
 				Limit:             gss.NoLimit,
 				Pretty:            v.GetBool(flagPretty),
-				Sorted:            v.GetBool(flagSorted),
+				Sorted:            sorted,
 				Reversed:          v.GetBool(flagReversed),
 				LineSeparator:     lineSeparator,
 				KeyValueSeparator: "=",
 				EscapePrefix:      "",
-			})
+			}
+
+			if !sorted {
+				if format == serializer.FormatTags {
+					header := make([]interface{}, 0)
+					for _, k := range args {
+						header = append(header, k)
+					}
+					serializeBytesInput.Header = header
+				}
+			}
+
+			outputBytes, err := gss.SerializeBytes(serializeBytesInput)
 			if err != nil {
 				return err
 			}
@@ -152,6 +164,8 @@ func main() {
 	initFlags(cmd.Flags())
 
 	if err := cmd.Execute(); err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, "goprintenv: "+err.Error())
+		fmt.Fprintln(os.Stderr, "Try goprintenv --help for more information.")
+		os.Exit(1)
 	}
 }
